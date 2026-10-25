@@ -61,6 +61,21 @@ O H2 já foi utilizado pelo grupo anteriormente e será aproveitado neste projet
 
 Ambiente de desenvolvimento utilizado pelo grupo para escrever, organizar, executar e testar o código Java e a aplicação Spring Boot.
 
+Navegador
+   │  (HTTP)
+   ▼
+Controller ──► recebe a requisição, chama o service, escolhe a página
+   │
+   ▼
+Service ────► regras de negócio (é erro? é lento? validações extras)
+   │
+   ▼
+Repository ─► conversa com o banco (JPA)
+   │
+   ▼
+H2 (arquivo) ◄─ dados persistidos
+
+
 # 5. Funcionamento geral
 
 De maneira simplificada, a aplicação seguirá este fluxo:
