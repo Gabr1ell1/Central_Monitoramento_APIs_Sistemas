@@ -51,11 +51,6 @@ Tecnologias utilizadas para construir a interface visual da aplicação.
 
 A proposta é criar uma interface simples, funcional e fácil de utilizar.
 
-- Banco de dados H2
-
-Banco de dados utilizado para armazenar os registros das requisições e manter as informações organizadas para consultas e alterações.
-
-O H2 já foi utilizado pelo grupo anteriormente e será aproveitado neste projeto.
 
 - Apache NetBeans
 
@@ -81,11 +76,7 @@ Service ────► regras de negócio (é erro? é lento? validações extr
    
 Repository ─► conversa com o banco (JPA)
 
-   │
-   
-   ▼
-   
-H2 (arquivo) ◄─ dados persistidos
+
 
 
 # 5. Funcionamento geral
