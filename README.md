@@ -1,11 +1,11 @@
-##💻 Central de Monitoramento de APIs e Sistemas
+## 💻 Central de Monitoramento de APIs e Sistemas
 
 A Central de Monitoramento de APIs e Sistemas é uma aplicação web desenvolvida para organizar e acompanhar informações sobre requisições realizadas entre sistemas.
 Imagine que um site tenha diferentes funcionalidades, como login, consulta de produtos e pagamentos. Cada uma delas depende de requisições para que as informações sejam processadas. Quando uma requisição falha ou demora muito para responder, pode prejudicar o funcionamento do sistema.
 
 O projeto simula esse cenário, permitindo registrar e consultar informações sobre essas requisições em um único lugar.
 
-#📍 2. Problema que queremos resolver
+# 📍 2. Problema que queremos resolver
 
 Quando existem muitas requisições, pode ser difícil identificar quais apresentaram erros, quais demoraram para responder e quais serviços precisam de atenção.
 
@@ -13,7 +13,7 @@ Sem essas informações organizadas, encontrar possíveis problemas e acompanhar
 
 Por isso, nossa proposta é criar uma aplicação que centralize esses registros e facilite a visualização, a busca e a organização das informações.
 
-#🎯 3. Objetivo da aplicação
+# 🎯 3. Objetivo da aplicação
 
 Desenvolver uma aplicação web simples que permita:
 
@@ -29,7 +29,7 @@ Desenvolver uma aplicação web simples que permita:
 
 Os dados utilizados poderão ser simulados, sem a necessidade de conectar a aplicação a sistemas reais.
 
-📢Importante: o objetivo inicial não é monitorar sistemas em tempo real, mas sim criar uma ferramenta para organizar e analisar registros de requisições.
+📢 Importante: o objetivo inicial não é monitorar sistemas em tempo real, mas sim criar uma ferramenta para organizar e analisar registros de requisições.
 
 # 4. Ferramentas e tecnologias
 
