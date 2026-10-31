@@ -116,60 +116,7 @@ Exemplo de registro:
   "statusProblema": "ABERTO"
 }
 ```
-
-### Regras de negócio no front-end
-- **Erro:** `codigoHttp >= 400`.
-- **Lenta:** `tempoRespostaMs > 1000`. O limite é a constante `LIMITE_LENTA_MS` no início do `app.js`.
-- **Situações possíveis:** `ABERTO`, `EM_ANALISE`, `RESOLVIDO`.
-
----
-
-## 5. Por que cada decisão foi tomada
-
-### Tecnologia e versões
-- **Maven, e não Gradle.** O NetBeans abre projetos Maven nativamente, sem plugin extra. Também é o padrão mais comum em material de aula de Java.
-- **Spring Boot 3.3.5 e Java 17.** O Spring Boot 3 exige Java 17 como mínimo. A versão 3.3.5 é estável e já tem tempo de uso, o que reduz o risco de bugs novos.
-- **Só a dependência `spring-boot-starter-web`.** Ela traz o servidor embutido (Tomcat), o Spring MVC e o Jackson (conversão para JSON). Nada além disso é necessário para o escopo, e menos dependências significam download mais rápido e menos pontos de falha.
-- **`exec.mainClass` no `pom.xml`.** Sem essa propriedade, o botão **Run Project** do NetBeans pode não saber qual classe executar em um projeto Spring Boot.
-
-### Divisão de pastas
-- **Pacote `br.edu.monitor`.** Segue a convenção Java de usar domínio invertido. Todas as classes ficam no mesmo pacote porque o projeto é pequeno. Separar em `controller`, `model` e `service` seria excesso para três classes.
-- **A classe principal fica na raiz do pacote.** O `@SpringBootApplication` varre o pacote dele e os subpacotes. Se a classe principal ficasse em outro lugar, o controller não seria encontrado.
-- **Front-end dentro de `static/`.** É a pasta que o Spring Boot serve sem configuração. Assim a página inicial é personalizada sem tocar no backend, que era o objetivo do enunciado.
-- **HTML, CSS e JS em arquivos separados.** Cada arquivo tem uma função: estrutura, aparência e comportamento. Isso facilita achar e alterar cada parte, e o navegador guarda CSS e JS em cache.
-- **Pastas `css/` e `js/`.** É a organização usual de projetos web e deixa claro o tipo de cada arquivo.
-
-### Backend
-- **`Requisicao` como `record`.** Um record é imutável e dispensa getters, setters e construtores escritos à mão. O Jackson (versão do Spring Boot 3) converte records para JSON e de volta sem configuração.
-- **Método `comId`.** Como o record é imutável, não dá para mudar o id depois de criado. Esse método devolve uma cópia com o id definido pelo servidor.
-- **Id gerado pelo servidor.** O cliente não escolhe o id, o que evita duplicidade e conflito.
-- **`ConcurrentHashMap` e `AtomicLong`.** O servidor atende várias requisições ao mesmo tempo. Essas classes são seguras para uso simultâneo, então a lista e o contador de ids não ficam corrompidos.
-- **Dados em memória, sem banco.** O pedido era uma aplicação simples e o foco é HTML e CSS. Um banco (JPA, H2 ou MySQL) adicionaria configuração e dependências sem ajudar nesse objetivo. A troca futura é simples: só o controller muda.
-- **Data como `String`.** O campo `datetime-local` do HTML envia texto como `2026-10-30T09:12`. Manter `String` evita erros de conversão de formato. Em contrapartida, o servidor não valida a data.
-- **Códigos HTTP corretos.** `404` quando o id não existe e `204` ao excluir, como pede a convenção REST.
-- **Rota `/api/...`.** O prefixo separa as rotas de dados das rotas de páginas.
-
-### Front-end
-- **JavaScript puro, sem React, Bootstrap ou outra biblioteca.** O enunciado fala em HTML e CSS, e o projeto é pequeno. Sem biblioteca não há download extra, não há ferramenta de build e o código pode ser lido do começo ao fim.
-- **Filtros e ordenação no navegador.** Para poucos registros, é mais rápido e mais simples do que criar parâmetros de consulta na API. Se a lista chegar a milhares de registros, o certo é mover isso para o servidor.
-- **Barra de tempo em cada linha.** Compara a lentidão de relance, sem ler os números. Ela fica âmbar quando passa do limite.
-- **Faixa colorida na lateral da linha.** Vermelho para erro e âmbar para lentidão. O destaque não depende só da cor do texto, o que ajuda quem tem dificuldade de distinguir cores.
-- **Cores com variáveis CSS (`:root`).** As cores ficam definidas em um só lugar. O tema escuro usa a mesma estrutura, trocando só os valores via `prefers-color-scheme`.
-- **Layout responsivo.** Com `grid` e regras `@media`, o formulário e os filtros se reorganizam em telas menores, e a tabela rola na horizontal em vez de quebrar a página.
-- **Foco visível e `label` em cada campo.** O navegador por teclado funciona e os campos têm rótulo associado, o que melhora a acessibilidade.
-- **Função `esc()` antes de inserir texto na tabela.** Os dados são montados como HTML. Sem escapar, um serviço cadastrado como `<script>...` seria executado no navegador (ataque XSS). A função converte o texto em conteúdo inofensivo.
-- **Modo demonstração.** Se a API não responde, a página usa cinco registros de exemplo e avisa. Isso permite ver e testar a interface mesmo abrindo o HTML sem o servidor.
-- **Botão de edição reaproveita o formulário.** Em vez de criar uma segunda tela, o mesmo formulário troca de título e de botão. Há menos código e a pessoa não perde o contexto.
-- **`confirm()` antes de excluir.** Excluir não tem desfazer, então uma confirmação evita perda por clique acidental.
-
-### Nomes e estilo de código
-- **Variáveis locais em `snake_case`** (`proximo_id`, `tempo_resposta`, `modo_demo`), seguindo a orientação do PDF da disciplina. Os nomes de classes e métodos em Java seguem a convenção da linguagem (`RequisicaoController`, `listar`).
-- **Campos do JSON em `camelCase`** (`codigoHttp`, `tempoRespostaMs`). É o padrão de APIs JSON e os nomes coincidem com os campos do record, o que permite a conversão automática.
-- **Comentários** apenas onde explicam o motivo ou o contrato (cabeçalho do `app.js`, aviso de dados em memória no controller).
-
----
-
-## 6. Limitações conhecidas
+## 5. Limitações conhecidas
 
 - **Sem persistência:** reiniciar a aplicação apaga os dados.
 - **Sem validação no servidor:** o backend aceita qualquer valor. A validação existe só nos campos do formulário.
@@ -193,10 +140,3 @@ Este projeto cobre a parte de **interface e CRUD via web**. O enunciado de Estru
 - relatório teórico.
 
 Esses itens pertencem ao backend. O caminho natural é trocar o `ConcurrentHashMap` do controller por uma estrutura própria (lista ligada ou deque) que leia e grave `entrada.txt`, sem mudar a interface.
-
-## 8. Próximos passos sugeridos
-
-1. Persistir os dados em arquivo (`entrada.txt`) usando uma lista ligada.
-2. Adicionar validação no servidor com `spring-boot-starter-validation`.
-3. Implementar as ordenações e gerar o log de tempos.
-4. Trocar a memória por um banco de dados, se o projeto crescer.
