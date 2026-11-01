@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geografia | Central de Monitoramento</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <header th:replace="~{fragmentos :: topo('geografia')}"></header>
+
+  <main>
+    <th:block th:replace="~{fragmentos :: aviso}"></th:block>
+
+    <section class="painel" aria-labelledby="t-paises">
+      <h2 id="t-paises">Tabela hash de países e fronteiras</h2>
+      <p class="nota">
+        Chave: nome do país. A função <code>hash()</code> combina as letras (h = h × 31 + letra) e usa o resto da divisão
+        por <b th:text="${capacidadePaises}">31</b> para achar o balde. Países que caem no mesmo balde ficam
+        encadeados em uma lista ligada (resolução de colisão). Hoje há <b th:text="${quantidadePaises}">0</b> países.
+      </p>
+      <form class="linha" th:action="@{/geografia/pais}" method="post">
+        <label>País <input name="nome" required placeholder="Chile"></label>
+        <label>Fronteiras (separadas por vírgula) <input name="fronteiras" placeholder="Peru, Bolívia, Argentina"></label>
+        <button type="submit" class="primario">Gravar país</button>
+      </form>
+      <form class="linha" th:action="@{/geografia}" method="get">
+        <label>Buscar país <input name="pais" th:value="${paisBuscado}" required placeholder="Brasil"></label>
+        <button type="submit">Buscar</button>
+      </form>
+      <div class="achado ok" th:if="${paisBuscado != null and paisAchado != null}">
+        <b th:text="${paisAchado.nome}">Brasil</b> (balde <span th:text="${paisAchado.balde}">0</span>) faz fronteira com:
+        <span th:text="${#strings.listJoin(paisAchado.fronteiras, ', ')}">...</span>
+      </div>
+      <div class="achado nao" th:if="${paisBuscado != null and paisAchado == null}">
+        País “<span th:text="${paisBuscado}"></span>” não encontrado.
+      </div>
+      <div class="tabela-wrap tabela-rolagem">
+        <table>
+          <thead><tr><th>País</th><th class="num">Balde</th><th>Fronteiras</th></tr></thead>
+          <tbody>
+            <tr th:each="p : ${paises}">
+              <td th:text="${p.nome}">Brasil</td>
+              <td class="num" th:text="${p.balde}">0</td>
+              <td th:text="${#strings.listJoin(p.fronteiras, ', ')}">...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="painel" aria-labelledby="t-cidades">
+      <h2 id="t-cidades">Tabela hash de cidades em ordem alfabética</h2>
+      <p class="nota">
+        A função <code>hash()</code> é <b>monótona</b>: balde = (1ª letra × 27) + 2ª letra. Se uma cidade vem antes de outra no
+        alfabeto, seu balde nunca é maior; dentro do balde a lista é mantida ordenada. Por isso basta percorrer os
+        <b>702</b> baldes em sequência para obter a lista classificada, sem executar nenhum algoritmo de ordenação.
+        Hoje há <b th:text="${quantidadeCidades}">0</b> cidades.
+      </p>
+      <form class="linha" th:action="@{/geografia/cidade}" method="post">
+        <label>Cidade <input name="nome" required placeholder="Aracaju"></label>
+        <button type="submit" class="primario">Inserir cidade</button>
+      </form>
+      <form class="linha" th:action="@{/geografia}" method="get">
+        <label>Buscar cidade <input name="cidade" th:value="${cidadeBuscada}" required placeholder="Curitiba"></label>
+        <button type="submit">Buscar</button>
+      </form>
+      <div class="achado ok" th:if="${cidadeBuscada != null and baldeCidade >= 0}">
+        <b th:text="${cidadeBuscada}">Curitiba</b> encontrada no balde <b th:text="${baldeCidade}">75</b>.
+      </div>
+      <div class="achado nao" th:if="${cidadeBuscada != null and baldeCidade < 0}">
+        Cidade “<span th:text="${cidadeBuscada}"></span>” não encontrada.
+      </div>
+      <div class="tabela-wrap tabela-rolagem">
+        <table>
+          <thead><tr><th class="num">#</th><th>Cidade (ordem alfabética)</th><th class="num">Balde</th></tr></thead>
+          <tbody>
+            <tr th:each="c, estado : ${cidades}">
+              <td class="num" th:text="${estado.count}">1</td>
+              <td th:text="${c.nome}">Cidade</td>
+              <td class="num" th:text="${c.balde}">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

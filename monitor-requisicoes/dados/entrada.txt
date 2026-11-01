@@ -1,0 +1,6 @@
+# LEIAUTE: id;servico;endpoint;metodo;codigoHttp;tempoRespostaMs;dataRequisicao;statusProblema
+1;pagamentos-api;/v1/pedidos;POST;201;240;2026-10-30T09:12;RESOLVIDO
+2;catalogo-api;/v1/produtos;GET;200;1850;2026-10-30T09:40;ABERTO
+3;auth-api;/v1/login;POST;500;620;2026-10-30T10:05;EM_ANALISE
+4;estoque-api;/v1/itens/42;GET;404;95;2026-10-30T10:22;ABERTO
+5;catalogo-api;/v1/categorias;GET;200;130;2026-10-30T10:31;RESOLVIDO

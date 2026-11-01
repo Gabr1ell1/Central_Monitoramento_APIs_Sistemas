@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Desempenho | Central de Monitoramento</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <header th:replace="~{fragmentos :: topo('desempenho')}"></header>
+
+  <main>
+    <section class="painel" aria-labelledby="t-log">
+      <h2 id="t-log">Relatório de desempenho</h2>
+      <p class="nota">
+        Toda operação grava uma linha em <code th:text="${arquivoLog}">logs/desempenho.log</code> com o
+        <b>tempo total de execução em milissegundos</b>. Abaixo, as 200 operações mais recentes (a mais nova primeiro).
+      </p>
+      <div class="tabela-wrap tabela-rolagem">
+        <table>
+          <thead><tr><th>Data e hora</th><th>Operação</th><th class="num">Tempo (ms)</th><th>Detalhe</th></tr></thead>
+          <tbody>
+            <tr th:each="e : ${entradas}">
+              <td th:text="${#strings.replace(e.dataHora, 'T', ' ')}">data</td>
+              <td><span class="etiqueta" th:text="${e.operacao}">READ</span></td>
+              <td class="num" th:text="${e.tempoMs}">0.000</td>
+              <td th:text="${e.detalhe}">detalhe</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="vazio" th:if="${#lists.isEmpty(entradas)}">Nenhuma operação registrada ainda.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ordenação | Central de Monitoramento</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <header th:replace="~{fragmentos :: topo('ordenacao')}"></header>
+
+  <main>
+    <th:block th:replace="~{fragmentos :: aviso}"></th:block>
+
+    <section class="painel" aria-labelledby="t-ord">
+      <h2 id="t-ord">Classificar os dados de entrada.txt</h2>
+      <p class="nota">
+        O arquivo tem <b th:text="${totalRegistros}">0</b> registros. Cada algoritmo ordena uma cópia dos mesmos dados
+        e grava um arquivo com o seu nome (ex.: <code>mergesort.txt</code>). Bubble, Insertion e Selection custam O(n²):
+        com 10.000 registros podem levar alguns segundos.
+      </p>
+      <form class="linha" th:action="@{/ordenacao}" method="post">
+        <label>Ordenar pelo campo
+          <select name="campo">
+            <option th:each="c : ${campos}" th:value="${c}" th:text="${c.rotulo}"
+                    th:selected="${campoSelecionado == c}">Tempo</option>
+          </select>
+        </label>
+        <label>Algoritmo
+          <select name="algoritmo">
+            <option value="todos" th:selected="${algoritmoSelecionado == null or algoritmoSelecionado == 'todos'}">Todos (comparar)</option>
+            <option th:each="a : ${algoritmos}" th:value="${a.id}" th:text="${a.nome + ' (' + a.categoria + ')'}"
+                    th:selected="${algoritmoSelecionado == a.id}">Bubble Sort</option>
+          </select>
+        </label>
+        <button type="submit" class="primario">Ordenar</button>
+      </form>
+    </section>
+
+    <section class="painel" th:if="${resultados != null}" aria-labelledby="t-res">
+      <h2 id="t-res">Resultado e comparativo de desempenho</h2>
+      <p class="nota">
+        Ordenado por <b th:text="${campoSelecionado.rotulo}">campo</b>.
+        O <i>tempo de ordenação</i> mede só o algoritmo; o <i>tempo total</i> inclui a gravação do arquivo.
+        A linha em verde é o algoritmo mais rápido.
+      </p>
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>Algoritmo</th><th>Categoria</th><th>Complexidade</th><th>Arquivo gerado</th>
+                <th class="num">Registros</th><th class="num">Comparações</th>
+                <th class="num">Tempo de ordenação (ms)</th><th class="num">Tempo total (ms)</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${resultados}" th:classappend="${r.algoritmo.id == maisRapido} ? 'melhor'">
+              <td th:text="${r.algoritmo.nome}">Bubble Sort</td>
+              <td th:text="${r.algoritmo.categoria}">Troca</td>
+              <td th:text="${r.algoritmo.complexidade}">O(n²)</td>
+              <td class="endpoint" th:text="${r.algoritmo.arquivoSaida}">bubblesort.txt</td>
+              <td class="num" th:text="${r.tamanho}">0</td>
+              <td class="num" th:text="${#numbers.formatInteger(r.comparacoes, 1, 'POINT')}">0</td>
+              <td class="num" th:text="${#numbers.formatDecimal(r.tempoOrdenacaoMs, 1, 'POINT', 3, 'COMMA')}">0</td>
+              <td class="num" th:text="${#numbers.formatDecimal(r.tempoTotalMs, 1, 'POINT', 3, 'COMMA')}">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Antes e depois (10 primeiros registros)</h3>
+      <details th:each="r : ${resultados}">
+        <summary th:text="${r.algoritmo.nome} + ' — ' + ${r.algoritmo.arquivoSaida}">Bubble Sort</summary>
+        <div class="grade-2">
+          <div>
+            <p class="nota">Antes (ordem do arquivo de entrada)</p>
+            <div class="tabela-wrap"><table th:replace="~{fragmentos :: tabelaSimples(${r.antes})}"></table></div>
+          </div>
+          <div>
+            <p class="nota">Depois (ordenado por <span th:text="${r.campo.rotulo}">campo</span>)</p>
+            <div class="tabela-wrap"><table th:replace="~{fragmentos :: tabelaSimples(${r.depois})}"></table></div>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+</body>
+</html>

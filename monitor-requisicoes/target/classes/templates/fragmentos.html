@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- Cabeçalho e menu, repetidos em todas as telas. O parâmetro "ativo" marca a tela atual. -->
+  <header class="topo" th:fragment="topo(ativo)">
+    <h1>Central de Monitoramento de APIs e Sistemas</h1>
+    <p>Registre requisições, ordene e pesquise os dados em arquivo e acompanhe o desempenho de cada operação.</p>
+    <nav class="menu" aria-label="Seções">
+      <a th:href="@{/}" th:classappend="${ativo == 'registros'} ? 'ativo'">Registros</a>
+      <a th:href="@{/ordenacao}" th:classappend="${ativo == 'ordenacao'} ? 'ativo'">Ordenação</a>
+      <a th:href="@{/pesquisa}" th:classappend="${ativo == 'pesquisa'} ? 'ativo'">Pesquisa</a>
+      <a th:href="@{/geografia}" th:classappend="${ativo == 'geografia'} ? 'ativo'">Geografia (hash)</a>
+      <a th:href="@{/desempenho}" th:classappend="${ativo == 'desempenho'} ? 'ativo'">Desempenho</a>
+    </nav>
+  </header>
+
+  <!-- Mensagem de retorno de uma ação (vem do controller por "flash attribute"). -->
+  <th:block th:fragment="aviso">
+    <p class="mensagem" role="status" th:if="${mensagem != null}" th:text="${mensagem}"></p>
+  </th:block>
+
+  <!-- Tabela simples de requisições, reutilizada em Ordenação e Pesquisa. -->
+  <table th:fragment="tabelaSimples(lista)">
+    <thead>
+      <tr><th>ID</th><th>Serviço</th><th>Endpoint</th><th>HTTP</th><th>Tempo</th><th>Data</th><th>Situação</th></tr>
+    </thead>
+    <tbody>
+      <tr th:each="r : ${lista}" th:classappend="${r.erro} ? 'com-erro' : (${r.lenta} ? 'com-lenta' : '')">
+        <td th:text="${r.id}">1</td>
+        <td th:text="${r.servico}">servico</td>
+        <td class="endpoint"><span class="metodo" th:text="${r.metodo}">GET</span><span th:text="${r.endpoint}">/rota</span></td>
+        <td><span class="http" th:classappend="${r.classeHttp}" th:text="${r.codigoHttp}">200</span></td>
+        <td class="num" th:text="${r.tempoRespostaMs} + ' ms'">0 ms</td>
+        <td th:text="${#strings.replace(r.dataRequisicao, 'T', ' ')}">data</td>
+        <td><span class="situacao" th:classappend="${r.statusProblema}" th:text="${r.statusProblema.rotulo}">Aberto</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pesquisa | Central de Monitoramento</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <header th:replace="~{fragmentos :: topo('pesquisa')}"></header>
+
+  <main>
+    <section class="painel" aria-labelledby="t-pesq">
+      <h2 id="t-pesq">Pesquisar dados</h2>
+      <p class="nota">
+        No <code>entrada.txt</code> (desordenado) a busca é <b>linear</b>: examina registro por registro.
+        Nos arquivos gerados pela ordenação a busca é <b>binária</b>: descarta metade dos dados a cada passo
+        e usa o campo pelo qual o arquivo foi ordenado.
+        Para ver os arquivos ordenados na lista, execute antes uma ordenação.
+      </p>
+      <form class="linha" th:action="@{/pesquisa}" method="get">
+        <label>Arquivo
+          <select name="arquivo">
+            <option th:each="a : ${arquivos}" th:value="${a}" th:text="${a}" th:selected="${arquivoSelecionado == a}">entrada.txt</option>
+          </select>
+        </label>
+        <label>Campo (usado só no entrada.txt)
+          <select name="campo">
+            <option th:each="c : ${campos}" th:value="${c}" th:text="${c.rotulo}" th:selected="${campoSelecionado == c}">Tempo</option>
+          </select>
+        </label>
+        <label>Valor exato <input name="valor" th:value="${valor}" required placeholder="ex.: 620 ou auth-api"></label>
+        <button type="submit" class="primario">Pesquisar</button>
+      </form>
+    </section>
+
+    <section class="painel" th:if="${resultado != null}" aria-labelledby="t-resp">
+      <h2 id="t-resp">Resultado</h2>
+      <p class="mensagem atencao" th:if="${resultado.mensagem != null}" th:text="${resultado.mensagem}"></p>
+      <div th:if="${resultado.campo != null}">
+        <div class="metricas">
+          <div><strong th:text="${resultado.metodo}">Linear</strong><span>método de busca</span></div>
+          <div><strong th:text="${#lists.size(resultado.encontrados)}">0</strong><span>registros encontrados</span></div>
+          <div><strong th:text="${#numbers.formatInteger(resultado.comparacoes, 1, 'POINT')}">0</strong><span>comparações</span></div>
+          <div><strong th:text="${#numbers.formatDecimal(resultado.tempoMs, 1, 'POINT', 3, 'COMMA')} + ' ms'">0 ms</strong><span>tempo da busca</span></div>
+        </div>
+        <p class="nota">
+          Arquivo <code th:text="${resultado.arquivo}">arquivo</code>, campo
+          <b th:text="${resultado.campo.rotulo}">campo</b> = <code th:text="${resultado.valor}">valor</code>
+        </p>
+        <div class="tabela-wrap" th:if="${not #lists.isEmpty(resultado.encontrados)}">
+          <table th:replace="~{fragmentos :: tabelaSimples(${resultado.encontrados})}"></table>
+        </div>
+        <p class="vazio" th:if="${#lists.isEmpty(resultado.encontrados)}">Nenhum registro com esse valor.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

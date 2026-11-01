@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registros | Central de Monitoramento</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <header th:replace="~{fragmentos :: topo('registros')}"></header>
+
+  <main>
+    <th:block th:replace="~{fragmentos :: aviso}"></th:block>
+
+    <section class="resumo" aria-label="Resumo">
+      <div><strong th:text="${total}">0</strong><span>requisições no arquivo</span></div>
+      <div class="erro"><strong th:text="${erros}">0</strong><span>com erro (HTTP 400+)</span></div>
+      <div class="lenta"><strong th:text="${lentas}">0</strong><span>lentas (acima de <b th:text="${limite}">1000</b> ms)</span></div>
+      <div><strong th:text="${abertos}">0</strong><span>problemas em aberto</span></div>
+    </section>
+
+    <!-- Operações sobre o arquivo como um todo -->
+    <section class="painel" aria-labelledby="t-arquivo">
+      <h2 id="t-arquivo">Arquivo de dados</h2>
+      <p class="nota">
+        Os registros ficam no arquivo <code>entrada.txt</code> (pasta <code th:text="${pasta}">dados</code>).
+        <b>Inclusão</b> segue a política de DEQUE (início ou fim) e <b>exclusão</b> segue LIFO:
+        sempre remove o último registro inserido, um por execução.
+      </p>
+      <form class="linha simples" th:action="@{/criar-arquivo}" method="post">
+        <button type="submit">Criar entrada.txt (com 5 exemplos)</button>
+      </form>
+      <form class="linha simples" th:action="@{/gerar}" method="post">
+        <label>Gerar simulados
+          <select name="quantidade">
+            <option value="100">100</option><option value="1000" selected>1.000</option>
+            <option value="5000">5.000</option><option value="10000">10.000</option>
+          </select>
+        </label>
+        <button type="submit">Gerar</button>
+      </form>
+      <form class="linha simples" th:action="@{/excluir-ultimo}" method="post">
+        <button type="submit">Excluir último registro (LIFO)</button>
+      </form>
+    </section>
+
+    <section class="painel" aria-labelledby="t-form">
+      <h2 id="t-form" th:text="${requisicao.id == null} ? 'Nova requisição' : 'Editar requisição #' + ${requisicao.id}">Nova requisição</h2>
+      <form th:action="@{/salvar}" th:object="${requisicao}" method="post" autocomplete="off">
+        <input type="hidden" th:field="*{id}">
+        <label>Serviço <input th:field="*{servico}" required placeholder="pagamentos-api"></label>
+        <label>Endpoint <input th:field="*{endpoint}" required placeholder="/v1/pedidos"></label>
+        <label>Método
+          <select th:field="*{metodo}">
+            <option th:each="m : ${metodos}" th:value="${m}" th:text="${m}">GET</option>
+          </select>
+        </label>
+        <label>Código HTTP <input type="number" min="100" max="599" th:field="*{codigoHttp}" required placeholder="200"></label>
+        <label>Tempo (ms) <input type="number" min="0" th:field="*{tempoRespostaMs}" required placeholder="320"></label>
+        <label>Data e hora <input type="datetime-local" th:field="*{dataRequisicao}" required></label>
+        <label>Situação
+          <select th:field="*{statusProblema}">
+            <option th:each="s : ${situacoes}" th:value="${s}" th:text="${s.rotulo}">Aberto</option>
+          </select>
+        </label>
+        <!-- Posição de inserção no deque: só faz sentido ao cadastrar -->
+        <label th:if="${requisicao.id == null}">Inserir no
+          <select name="posicao">
+            <option value="fim">fim do arquivo</option>
+            <option value="inicio">início do arquivo</option>
+          </select>
+        </label>
+        <div class="acoes">
+          <button type="submit" class="primario"
+                  th:text="${requisicao.id == null} ? 'Cadastrar requisição' : 'Salvar alterações'">Cadastrar requisição</button>
+          <a class="botao cancelar" th:if="${requisicao.id != null}" th:href="@{/}">Cancelar edição</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="painel" aria-labelledby="t-lista">
+      <h2 id="t-lista">Registros</h2>
+      <form class="filtros" th:action="@{/}" method="get">
+        <label>Buscar <input type="search" name="q" th:value="${q}" placeholder="Serviço ou endpoint"></label>
+        <label>Mostrar
+          <select name="tipo">
+            <option value="todos" th:selected="${tipo == 'todos'}">Todas</option>
+            <option value="erro" th:selected="${tipo == 'erro'}">Só com erro</option>
+            <option value="lenta" th:selected="${tipo == 'lenta'}">Só lentas</option>
+            <option value="problema" th:selected="${tipo == 'problema'}">Erro ou lentas</option>
+          </select>
+        </label>
+        <label>Situação
+          <select name="situacao">
+            <option value="">Qualquer</option>
+            <option th:each="s : ${situacoes}" th:value="${s}" th:text="${s.rotulo}"
+                    th:selected="${situacao == s.name()}">Aberto</option>
+          </select>
+        </label>
+        <div class="acoes">
+          <button type="submit" class="primario">Aplicar filtros</button>
+          <a class="botao cancelar" th:href="@{/}">Limpar</a>
+        </div>
+      </form>
+
+      <p class="nota" th:if="${totalFiltrado > maximoNaTela}"
+         th:text="'Mostrando os primeiros ' + ${maximoNaTela} + ' de ' + ${totalFiltrado} + ' registros. Use os filtros para refinar.'"></p>
+
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Serviço</th><th>Endpoint</th><th>HTTP</th><th>Tempo de resposta</th><th>Data</th><th>Situação</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${registros}"
+                th:classappend="${r.erro} ? 'com-erro' : (${r.lenta} ? 'com-lenta' : '')">
+              <td th:text="${r.id}">1</td>
+              <td th:text="${r.servico}">servico</td>
+              <td class="endpoint"><span class="metodo" th:text="${r.metodo}">GET</span><span th:text="${r.endpoint}">/rota</span></td>
+              <td><span class="http" th:classappend="${r.classeHttp}" th:text="${r.codigoHttp}">200</span></td>
+              <td>
+                <div class="tempo" th:classappend="${r.lenta} ? 'lenta-barra' : ''">
+                  <span class="trilho"><span class="barra" th:style="'width:' + ${r.larguraBarra(maior)} + '%'"></span></span>
+                  <b th:text="${r.tempoRespostaMs} + ' ms'">0 ms</b>
+                </div>
+              </td>
+              <td th:text="${#strings.replace(r.dataRequisicao, 'T', ' ')}">data</td>
+              <td><span class="situacao" th:classappend="${r.statusProblema}" th:text="${r.statusProblema.rotulo}">Aberto</span></td>
+              <td class="botoes"><a class="botao" th:href="@{/(editar=${r.id})}">Editar</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="vazio" th:if="${#lists.isEmpty(registros)}">Nenhum registro encontrado. Ajuste os filtros ou cadastre uma requisição.</p>
+
+      <!-- READ do arquivo bruto: mostra como os dados estão gravados -->
+      <details>
+        <summary>Ver o conteúdo bruto de entrada.txt (primeiras 30 linhas)</summary>
+        <pre class="arquivo" th:text="${#strings.listJoin(linhasArquivo, '\n')}">arquivo</pre>
+      </details>
+    </section>
+  </main>
+</body>
+</html>
