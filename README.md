@@ -171,33 +171,6 @@ O custo é a página recarregar a cada ação e a ausência de confirmação ao 
 - **Variáveis locais em `snake_case`** (como `proximo_id`), seguindo a orientação do PDF da disciplina. Classes e métodos seguem a convenção Java (`RequisicaoController`, `listar`), e os campos do modelo seguem o padrão JavaBean (`codigoHttp`).
 
 ---
-
-## 6. Limitações conhecidas
-
-- **Sem persistência:** reiniciar apaga o que foi cadastrado.
-- **Sem validação no servidor:** só os atributos HTML (`required`, `min`, `max`) validam os campos.
-- **Sem confirmação ao excluir:** exigiria JavaScript.
-- **Filtrar recarrega a página:** é o comportamento natural sem JavaScript.
-- **Sem autenticação e sem testes automatizados.**
-- **Não foi executado nem compilado em ambiente real** ao ser gerado. Se algo falhar ao rodar, comece pela tabela de problemas comuns.
-
----
-
-## 7. Relação com o enunciado da disciplina
-
-Este projeto cobre a parte de **interface e CRUD web**. O enunciado de Estrutura de Dados também pede itens que **não estão implementados**:
-
-- arquivo `entrada.txt` com leiaute definido;
-- inclusão em DEQUE (FIFO) e exclusão LIFO;
-- listas ligadas nas operações de CRUD;
-- quatro algoritmos de ordenação, com um arquivo de saída por algoritmo;
-- pesquisa em arquivo ordenado e não ordenado;
-- tabelas hash (países e fronteiras, cidades em ordem alfabética);
-- log de desempenho com o tempo de cada operação;
-- relatório teórico.
-
-O caminho natural é trocar o `ConcurrentHashMap` do `RequisicaoRepositorio` por uma estrutura própria (lista ligada ou deque) que leia e grave `entrada.txt`. O controller e a página continuam como estão.
-
 ## 8. Próximos passos sugeridos
 
 1. Persistir os dados em `entrada.txt` usando uma lista ligada.
